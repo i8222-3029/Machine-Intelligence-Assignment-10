@@ -19,14 +19,18 @@ class Warehouse6DEnv(ContinuousWarehouseEnv):
         self.step_count = 0
         return self.state.copy()
     def step(self, action):
-        x, y, theta, v, load, battery = self.state
-        # 기존 이동
-        next_state, reward, done, info = super().step(action)
+        # 6D 상태에서 4D만 부모에 넘김
+        base_state = self.state[:4]
+        load, battery = self.state[4], self.state[5]
+        # 부모의 state를 4D로 임시 설정
+        self.state = base_state
+        next_base, reward, done, info = super().step(action)
         # load: 고정, battery: 감소
         battery = max(battery - 0.01, 0.0)
         # 속도는 load, battery에 따라 감소
-        v = v * (1 - 0.5 * load) * (0.5 + 0.5 * battery)
-        self.state = np.array([next_state[0], next_state[1], next_state[2], v, load, battery])
+        v = next_base[3] * (1 - 0.5 * load) * (0.5 + 0.5 * battery)
+        # 6D로 재조립
+        self.state = np.array([next_base[0], next_base[1], next_base[2], v, load, battery])
         # 보상: load가 높을수록 goal 도달시 보상 증가
         dist_goal = np.linalg.norm(self.state[:2] - self.goal)
         if dist_goal < self.goal_radius:

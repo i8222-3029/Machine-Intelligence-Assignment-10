@@ -1,6 +1,9 @@
 # DQN Ablation 실험 스크립트
 import matplotlib.pyplot as plt
 from scipy.ndimage import uniform_filter1d
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.continuous_warehouse import ContinuousWarehouseEnv
 from src.dqn_agent import DQNAgent
 
